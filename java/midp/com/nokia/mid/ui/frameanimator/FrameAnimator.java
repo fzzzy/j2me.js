@@ -15,48 +15,44 @@ public class FrameAnimator {
 
     protected static int _numRegistered;
 
+    protected FrameAnimatorListener _registered;
+
     public FrameAnimator() {
-        System.out.println("warning: FrameAnimator() not implemented");
+        _registered = null;
     }
 
     public boolean register(int x, int y, short maxFps, short maxPps, FrameAnimatorListener listener) {
-        System.out.println("warning: FrameAnimator.register(IISSL...FrameAnimatorListener;)Z not implemented (" +
-                           x + ", " + y + ", " + maxFps + ", " + maxPps + ", " + listener + ")");
+        _registered = listener;
         _numRegistered++;
         return true;
     }
 
     public void unregister() {
-        System.out.println("warning: FrameAnimator.unregister()V not implemented");
+        _registered = null;
         _numRegistered--;
     }
 
     public void drag(int x, int y) {
-        System.out.println("warning: FrameAnimator.drag(II)V not implemented (" + x + ", " + y + ")");
+        _registered.animate(this, x, y, 0, 0, 0, true);
     }
 
     public void kineticScroll(int speed, int direction, int friction, float angle) {
-        System.out.println("warning: FrameAnimator.kineticScroll(IIIF)V not implemented (" +
-                           speed + ", " + direction + ", " + friction + ", " + angle + ")");
+        _registered.animate(this, 0, 0, 0, 0, 0, true);
     }
 
     public void limitedKineticScroll(int speed, int direction, int friction, float angle, int limitUp, int limitDown) {
-        System.out.println("warning: FrameAnimator.limitedKineticScroll(IIIFII)V not implemented (" +
-                           speed + ", " + direction + ", " + friction + ", " + angle + ", " + limitUp + ", " +
-                           limitDown + ")");
+        _registered.animate(this, 0, 0, 0, 0, 0, true);
     }
 
     public void stop() {
-        System.out.println("warning: FrameAnimator.stop()V not implemented");
+        // Do nothing; all animations in this implementation are currently synchronous
     }
 
     public boolean isRegistered() {
-        System.out.println("warning: FrameAnimator.isRegistered()Z not implemented");
-        return true;
+        return _registered != null;
     }
 
     public static int getNumRegisteredFrameAnimators() {
-        System.out.println("warning: FrameAnimator.getNumRegisteredFrameAnimators()I not implemented");
         return _numRegistered;
     }
 
