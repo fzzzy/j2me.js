@@ -33,15 +33,15 @@ public class FrameAnimator {
     }
 
     public void drag(int x, int y) {
-        _registered.animate(this, x, y, 0, 0, 0, true);
+        _registered.animate(this, x, y, (short)0, (short)0, (short)0, true);
     }
 
     public void kineticScroll(int speed, int direction, int friction, float angle) {
-        _registered.animate(this, 0, 0, 0, 0, 0, true);
+        _registered.animate(this, 0, 0, (short)0, (short)0, (short)0, true);
     }
 
     public void limitedKineticScroll(int speed, int direction, int friction, float angle, int limitUp, int limitDown) {
-        _registered.animate(this, 0, 0, 0, 0, 0, true);
+        _registered.animate(this, 0, 0, (short)0, (short)0, (short)0, true);
     }
 
     public void stop() {
