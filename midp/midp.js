@@ -1741,3 +1741,61 @@ Native["org/mozilla/io/LocalMsgConnection.closeConnection.()V"] = function(ctx, 
         delete MIDP.LocalMsgConnections[_this.protocolName];
     }
 }
+
+var waitingPush = null;
+
+Native["com/sun/midp/io/j2me/push/ConnectionRegistry.poll0.(J)I"] = function(ctx, stack) {
+  var time = stack.pop(), _this = stack.pop();
+  // Wait for incoming connections
+  console.log("WAIT FOR INCOMING CONNECTIONS");
+
+  waitingPush = function() {
+    waitingPush = null;
+    ctx.resume();
+  }
+
+  throw VM.Pause;
+}
+
+Native["com/sun/midp/io/j2me/push/ConnectionRegistry.getMIDlet0.(I[BI)I"] = function(ctx, stack) {
+  var entrysz = stack.pop(), regentry = stack.pop(), handle = stack.pop();
+
+  console.log("\ngetMidlet0\n");
+
+  var buf = new TextEncoder().encode("whatsapp, com.whatsapp.client.test.ContactListMidlet, *, 1");
+
+  for (var i = 0; i < buf.byteLength; i++) {
+    regentry[i] = buf[i];
+  }
+
+  stack.push(0);
+}
+
+Native["com/sun/midp/io/j2me/push/ConnectionRegistry.checkInByName0.([B)I"] = function(ctx, stack) {
+  var name = stack.pop();
+  console.log("CheckIn: " + util.decodeUtf8(name));
+  stack.push(0);
+}
+
+Native["org/mozilla/io/LocalMsgConnection.init.(Ljava/lang/String;)V"] = function(ctx, stack) {
+    var name = util.fromJavaString(stack.pop()), _this = stack.pop();
+    console.log("CONNECT: " + name);
+
+    _this.server = (name[2] == ":");
+    _this.protocolName = name.slice((name[2] == ':') ? 3 : 2);
+
+    if (_this.server) {
+        MIDP.LocalMsgConnections[_this.protocolName] = new LocalMsgConnection();
+
+        if (waitingPush) {
+          waitingPush();
+        }
+    } else {
+        if (!MIDP.LocalMsgConnections[_this.protocolName]) {
+            throw VM.Pause;
+        }
+
+        MIDP.LocalMsgConnections[_this.protocolName].notifyConnection();
+    }
+}
+
