@@ -19,7 +19,6 @@ class TextEditorThread implements Runnable {
             sleep();
             int dirty = getNextDirtyEditor();
             TextEditor t = (TextEditor)listeners.get("" + dirty);
-            System.out.println("Got listener " + t);
             t.myListener.inputAction(t, TextEditorListener.ACTION_CONTENT_CHANGE);
         }
     }
@@ -144,6 +143,7 @@ public class TextEditor extends CanvasItem {
 
     // Gets the whole content height in this TextEditor in pixels.
     public int getContentHeight() {
+        System.out.println("warning: TextEditor::getContentHeight needs a more correct implementation");
         return getFont().getHeight();
     }
 
