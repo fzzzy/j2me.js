@@ -1,7 +1,5 @@
 package com.nokia.mid.ui;
 
-import com.nokia.mid.ui.CanvasItem;
-import com.nokia.mid.ui.TextEditorListener;
 import javax.microedition.lcdui.Font;
 import java.util.Hashtable;
 
@@ -10,23 +8,24 @@ class TextEditorThread implements Runnable {
     native void sleep();
     native int getNextDirtyEditor();
 
-    Hashtable _listeners;
+    Hashtable listeners;
 
     TextEditorThread() {
-        _listeners = new Hashtable();
+        listeners = new Hashtable();
     }
 
     public void run() {
         while (true) {
             sleep();
             int dirty = getNextDirtyEditor();
-            TextEditor t = (TextEditor)_listeners.get("" + dirty);
-            t._listener.inputAction(t, TextEditorListener.ACTION_CONTENT_CHANGE);
+            TextEditor t = (TextEditor)listeners.get("" + dirty);
+            System.out.println("Got listener " + t);
+            t.myListener.inputAction(t, TextEditorListener.ACTION_CONTENT_CHANGE);
         }
     }
 
     void register(int id, TextEditor t) {
-        _listeners.put("" + id, t);
+        listeners.put("" + id, t);
     }
 }
 
@@ -34,19 +33,19 @@ public class TextEditor extends CanvasItem {
     // This flag is a hint to the implementation that during text editing, the smiley key should be disabled on the virtual keyboard.
     public static final int DISABLE_SMILEY_MODE = 4194304;
 
-    protected TextEditorListener _listener;
+    protected TextEditorListener myListener;
 
-    private int _backgroundColor;
-    private int _foregroundColor;
-    private boolean _multiline;
-    private boolean _visible;
-    private Object _parent;
-    private boolean _focus;
-    private int _maxSize;
-    private int _width;
-    private int _height;
-    private int _id;
-    private static TextEditorThread _textEditorThread;
+    private int backgroundColor = 0;
+    private int foregroundColor = 0;
+    private boolean multiline = true;
+    private boolean visible = true;
+    private Object parent = null;
+    private boolean focus = false;
+    private int maxSize = 0;
+    private int width = 0;
+    private int height = 0;
+    private int myId;
+    private static TextEditorThread textEditorThread;
 
     native int TextEditor0();
     native void setParent0(Object theParent);
@@ -57,20 +56,10 @@ public class TextEditor extends CanvasItem {
     native int size0();
 
     protected TextEditor(String label, String text, int maxSize, int constraints, int width, int height) {
-        _listener = null;
-        _backgroundColor = 0;
-        _foregroundColor = 0;
-        _multiline = true;
-        _visible = true;
-        _parent = null;
-        _focus = false;
-        _maxSize = 0;
-        _width = width;
-        _height = height;
-        _id = TextEditor0();
-        if (_textEditorThread == null) {
-            _textEditorThread = new TextEditorThread();
-            Thread t = new Thread(_textEditorThread);
+        myId = TextEditor0();
+        if (textEditorThread == null) {
+            textEditorThread = new TextEditorThread();
+            Thread t = new Thread(textEditorThread);
             t.start();
         }
     }
@@ -82,29 +71,29 @@ public class TextEditor extends CanvasItem {
 
     // Creates a new empty TextEditor with the given maximum size in characters, constraints and editor size as number of visible rows.
     public static TextEditor createTextEditor(int maxSize, int constraints, int width, int rows) {
-        return createTextEditor("", maxSize, constraints, width, rows);
+        return createTextEditor("", maxSize, constraints, width, Font.getDefaultFont().getHeight() * rows);
     }
 
     // Sets this TextEditor focused or removes keyboard focus.
     public void setFocus(boolean focused) {
-        _focus = focused;
+        focus = focused;
         System.out.println("warning: TextEditor::setFocus(boolean) not implemented (" + focused + ")");
     }
 
     // Returns the focus state of TextEditor.
     public boolean hasFocus() {
-        return _focus;
+        return focus;
     }
 
     // Set the parent object of this TextEditor.
     public void setParent(Object theParent) {
-        _parent = theParent;
+        parent = theParent;
         setParent0(theParent);
     }
 
     // Get the parent object of this TextEditor.
     public Object getParent() {
-        return _parent;
+        return parent;
     }
 
     // Sets the size of this TextEditor in pixels.
@@ -119,12 +108,13 @@ public class TextEditor extends CanvasItem {
 
     // Sets the visibility value of TextEditor.
     public void setVisible(boolean visible) {
-        _visible = visible;
+        System.out.println("warning: TextEditor::setVisible(boolean) not implemented (" + visible + ")");
+        visible = visible;
     }
 
     // Gets the visibility value of TextEditor.
     public  boolean isVisible() {
-        return _visible;
+        return visible;
     }
 
     // Sets the Z-position, or the elevation, of the item.
@@ -159,7 +149,7 @@ public class TextEditor extends CanvasItem {
 
     // Sets the index of the caret.
     public void setCaret(int index) {
-        System.out.println("TextEditor::setCaret(int) not implemented");
+        System.out.println("warning: TextEditor::setCaret(int) not implemented");
     }
 
     // Gets the current position of the caret in the editor.
@@ -185,22 +175,22 @@ public class TextEditor extends CanvasItem {
 
     // Gets the background color and alpha of this TextEditor.
     public int getBackgroundColor() {
-        return _backgroundColor;
+        return backgroundColor;
     }
 
     // Gets the foreground color and alpha of this TextEditor.
     public int getForegroundColor() {
-        return _foregroundColor;
+        return foregroundColor;
     }
 
     // Sets the background color and alpha of this TextEditor to the specified values.
     public void setBackgroundColor(int color) {
-        _backgroundColor = color;
+        backgroundColor = color;
     }
 
     // Sets the foreground color and alpha of this TextEditor to the specified values.
     public void setForegroundColor(int color) {
-        _foregroundColor = color;
+        foregroundColor = color;
     }
 
     // Sets the highlight background color.
@@ -235,14 +225,14 @@ public class TextEditor extends CanvasItem {
 
     // Returns the maximum size (number of characters) that can be stored in this TextEditor.
     public int getMaxSize() {
-        System.out.println("TextEditor::getMaxSize() not implemented");
-        return _maxSize;
+        System.out.println("warning: TextEditor::getMaxSize() not implemented");
+        return maxSize;
     }
 
     // Sets the maximum size (number of characters) that can be contained in this TextEditor.
     public int setMaxSize(int maxSize) {
-        _maxSize = maxSize;
-        System.out.println("TextEditor::setMaxSize(int) not implemented");
+        maxSize = maxSize;
+        System.out.println("warning: TextEditor::setMaxSize(int) not implemented");
         return maxSize;
     }
 
@@ -283,18 +273,18 @@ public class TextEditor extends CanvasItem {
 
     // Sets a listener for content changes in this TextEditor, replacing any previous TextEditorListener.
     public void setTextEditorListener(TextEditorListener listener) {
-        _listener = listener;
-        _textEditorThread.register(_id, this);
+        myListener = listener;
+        textEditorThread.register(myId, this);
     }
 
     // Returns the multiline state of the TextEditor.
     public boolean isMultiline() {
-        return _multiline;
+        return multiline;
     }
 
     // Sets the editor to be either multi-line (true) or single-line (false).
     public void setMultiline(boolean aMultiline) {
-        _multiline = aMultiline;
+        multiline = aMultiline;
     }
 
     // If the default indicator location is not used then sets the drawing location for input indicators relative to the TextEditor's parent.
@@ -343,11 +333,11 @@ public class TextEditor extends CanvasItem {
     }
 
     public int getWidth() {
-        return _width;
+        return width;
     }
 
     public int getHeight() {
-        return _height;
+        return height;
     }
 }
 
